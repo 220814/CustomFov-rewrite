@@ -13,14 +13,22 @@ public class MixinGameRenderer {
     private void onGetFov(CallbackInfoReturnable<Double> cir) {
         if (isRenderingHand()) {
             cir.setReturnValue(70.0);
+            return;
+        }
+
+        double original = cir.getReturnValue();
+        
+        if (original > 30.0) {
+            double customFov = 30.0 + (original - 30.0) * (170.0 - 30.0) / (110.0 - 30.0);
+            cir.setReturnValue(customFov);
         }
     }
 
     private boolean isRenderingHand() {
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        for (int i = 0; i < Math.min(stackTrace.length, 12); i++) {
-            String methodName = stackTrace[i].getMethodName();
-            if (methodName.equals("renderHand") || methodName.equals("method_3195")) {
+        StackTraceElement[] frames = Thread.currentThread().getStackTrace();
+        for (int i = 0; i < Math.min(frames.length, 12); i++) {
+            String m = frames[i].getMethodName();
+            if (m.equals("renderHand") || m.equals("method_3195")) {
                 return true;
             }
         }
