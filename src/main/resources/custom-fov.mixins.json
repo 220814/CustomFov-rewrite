@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"MixinGameRenderer"
+	    "MixinGameOptions" 
 	],
 	"injectors": {
 		"defaultRequire": 1
