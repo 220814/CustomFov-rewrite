@@ -1,37 +1,49 @@
 package me.aidrob.mixin;
 
+import net.minecraft.client.option.SimpleOption;
 import net.minecraft.client.render.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(value = GameRenderer.class, priority = 1000)
 public class MixinGameRenderer {
 
-    @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
-    private void onGetFov(CallbackInfoReturnable<Double> cir) {
-        if (isRenderingHand()) {
-            cir.setReturnValue(70.0);
-            return;
+    @Redirect(
+        method = "getFov",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/option/SimpleOption;getValue()Ljava/lang/Object;"
+        )
+    )
+    private Object redirectFovValue(SimpleOption<Integer> option) {
+        Integer value = option.getValue();
+
+        if (isRenderingHandContext()) {
+            return value;
         }
 
-        double original = cir.getReturnValue();
-        
-        if (original > 30.0) {
-            double customFov = 30.0 + (original - 30.0) * (170.0 - 30.0) / (110.0 - 30.0);
-            cir.setReturnValue(customFov);
+        double minFov = 30.0;
+        double maxFov = 110.0;
+        double targetMax = 170.0;
+
+        if (value > minFov) {
+            double customFov = minFov + (value - minFov) * (targetMax - minFov) / (maxFov - minFov);
+            return (int) Math.round(customFov);
         }
+
+        return value;
     }
 
-    private boolean isRenderingHand() {
+    private boolean isRenderingHandContext() {
         StackTraceElement[] frames = Thread.currentThread().getStackTrace();
-        for (int i = 0; i < Math.min(frames.length, 12); i++) {
+        for (int i = 0; i < Math.min(frames.length, 15); i++) {
             String m = frames[i].getMethodName();
-            if (m.equals("renderHand") || m.equals("method_3195")) {
+            if (m.equals("renderHand") || m.equals("method_3195") || m.equals("renderItemInHand")) {
                 return true;
             }
         }
         return false;
     }
 }
+            
