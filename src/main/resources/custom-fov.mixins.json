@@ -1,12 +1,12 @@
 {
-	"required": true,
-	"package": "me.aidrob.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"MixinGameRenderer"
-	    "MixinGameOptions" 
-	],
-	"injectors": {
-		"defaultRequire": 1
-	}
+  "required": true,
+  "package": "me.aidrob.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MixinGameRenderer",
+    "MixinGameOptions"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
